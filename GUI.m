@@ -22,9 +22,8 @@ function varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 12-Jun-2017 12:51:11
+% Last Modified by GUIDE v2.5 13-Jun-2017 17:14:30
 
-% Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
     'gui_Singleton',  gui_Singleton, ...
@@ -41,7 +40,6 @@ if nargout
 else
     gui_mainfcn(gui_State, varargin{:});
 end
-% End initialization code - DO NOT EDIT
 
 
 % --- Executes just before GUI is made visible.
@@ -56,12 +54,13 @@ function GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 handles.FileName = -1;
 handles.FilePath = -1;
+handles.dataResolutionEditPrev = str2double(handles.dataResolutionEdit.String);
+handles.frameRateEditPrev = str2double(handles.frameRateEdit.String);
+handles.widthEditPrev = str2double(handles.widthEdit.String);
+handles.heightEditPrev = str2double(handles.heightEdit.String);
 
 % Update handles structure
 guidata(hObject, handles);
-
-% UIWAIT makes GUI wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -147,7 +146,15 @@ function frameRateEdit_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of frameRateEdit as text
 %        str2double(get(hObject,'String')) returns contents of frameRateEdit as a double
-handles.timeFactorStatic.String = ['Zeitfaktor: ' num2str(round(str2double(handles.frameRateEdit.String)/str2double(handles.dataResolutionEdit.String),2))];
+nVal = str2double(handles.frameRateEdit.String);
+if mod(nVal, 1) == 0 && nVal > 0
+    handles.frameRateEditPrev = nVal;
+    guidata(hObject, handles);
+    handles.timeFactorStatic.String = ['Zeitfaktor: ' num2str(round(nVal/str2double(handles.dataResolutionEdit.String),2))];
+else
+    msgbox('Wert muss ein Integer größer als 0 sein.','Error','error');
+    handles.frameRateEdit.String = num2str(handles.frameRateEditPrev);
+end
 
 
 function dataResolutionEdit_Callback(hObject, eventdata, handles)
@@ -157,7 +164,15 @@ function dataResolutionEdit_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of dataResolutionEdit as text
 %        str2double(get(hObject,'String')) returns contents of dataResolutionEdit as a double
-handles.timeFactorStatic.String = ['Zeitfaktor: ' num2str(round(str2double(handles.frameRateEdit.String)/str2double(handles.dataResolutionEdit.String),2))];
+nVal = str2double(handles.dataResolutionEdit.String);
+if mod(nVal, 1) == 0 && nVal > 0 && nVal <= 1000
+    handles.dataResolutionEditPrev = nVal;
+    guidata(hObject, handles);
+    handles.timeFactorStatic.String = ['Zeitfaktor: ' num2str(round(str2double(handles.frameRateEdit.String)/nVal,2))];
+else
+    msgbox('Wert muss ein Integer größer als 0 und kleiner gleich 1000 sein.','Error','error');
+    handles.dataResolutionEdit.String = num2str(handles.dataResolutionEditPrev);
+end
 
 
 % --- Executes on button press in fileChooserBtn.
@@ -174,6 +189,44 @@ if filename ~= 0
 end
 
 
+function widthEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to widthEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of widthEdit as text
+%        str2double(get(hObject,'String')) returns contents of widthEdit as a double
+nVal = str2double(handles.widthEdit.String);
+maxVal = get(0,'ScreenSize');
+maxVal = maxVal(3);
+if mod(nVal, 1) == 0 && nVal > 0 && nVal <= maxVal
+    handles.widthEditPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox('Wert muss ein Integer größer als 0 und kleiner gleich der momentanen Bildschirmbreite in Pixel sein.','Error','error');
+    handles.widthEdit.String = num2str(handles.widthEditPrev);
+end
+
+
+function heightEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to heightEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of heightEdit as text
+%        str2double(get(hObject,'String')) returns contents of heightEdit as a double
+nVal = str2double(handles.heightEdit.String);
+maxVal = get(0,'ScreenSize');
+maxVal = maxVal(4);
+if mod(nVal, 1) == 0 && nVal > 0 && nVal <= maxVal
+    handles.heightEditPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox('Wert muss ein Integer größer als 0 und kleiner gleich der momentanen Bildschirmöhe in Pixel sein.','Error','error');
+    handles.heightEdit.String = num2str(handles.heightEditPrev);
+end
+
+
 % --- Executes on button press in renderBtn.
 function renderBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to renderBtn (see GCBO)
@@ -187,23 +240,21 @@ render(handles);
 function render(handles)
 startTime = tic;
 
+if isequal(handles.FilePath, -1)
+    msgbox(['Keine Datei gew' char(228) 'hlt.'],'Error','error')
+    return
+end
 singleLineTrajectory = handles.singleLineCBox.Value;
 drawBodyCurve = handles.drawCurveCBox.Value;
 drawTrajectory = handles.drawTrajectoryCBox.Value;
-doExport =  handles.exportCBox.Value;
-clearFigure = handles.clearCBox.Value;
-dataResolution = str2double(handles.dataResolutionEdit.String);
-framerate = str2double(handles.frameRateEdit.String);
-
 if ~drawBodyCurve && ~drawTrajectory
     msgbox('''Kurve zeichnen'' oder ''Bahnverlauf zeichnen'' muss gesetzt sein.','Error','error')
     return
 end
-
-if isequal(handles.FilePath, -1)
-    msgbox('Keine Datei gewÃ¤hlt.','Error','error')
-    return
-end
+doExport =  handles.exportCBox.Value;
+clearFigure = handles.clearCBox.Value;
+dataResolution = str2double(handles.dataResolutionEdit.String);
+framerate = str2double(handles.frameRateEdit.String);
 
 config = load(strcat(handles.FilePath, handles.FileName));
 config = config.config;
@@ -211,7 +262,7 @@ config = config.config;
 maxI = size(config, 1);
 framenumber = round(maxI/1000*min([1000 dataResolution]));
 indeces = round(linspace(1, maxI, framenumber));
-f1 = figure('InnerPosition', [0 0 1280 720]);
+f1 = figure('Position', [0 0 str2double(handles.widthEdit.String) str2double(handles.heightEdit.String)], 'PaperPositionMode','auto');
 colormap([0.3 0.3 0.3])
 lightangle(40,15)
 xlabel('x');ylabel('y');zlabel('z');
@@ -274,7 +325,7 @@ if doExport
                 shading interp
             end
             writeVideo(v, getframe(f1));
-            cla(f1);%replace with delete() twice
+            cla(f1);
         else
             if drawTrajectory
                 j = plot3(headData(1,1:i),headData(2,1:i),headData(3,1:i),'-r');
@@ -325,6 +376,7 @@ end
 rTime = toc(startTime);
 fprintf('Time elapsed: %.0fh %.0fm %.0fs %.0fms\n', ...
     floor(rTime/3600),floor(mod(rTime/60,60)), floor(mod(rTime,60)), (rTime-floor(rTime))*1000);
+
 
 %Function to compute an amount of points on the circle segment described by
 %the values obtained by the simulation.
