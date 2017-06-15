@@ -22,7 +22,7 @@ function varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 13-Jun-2017 17:14:30
+% Last Modified by GUIDE v2.5 15-Jun-2017 12:20:20
 
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -58,6 +58,12 @@ handles.dataResolutionEditPrev = str2double(handles.dataResolutionEdit.String);
 handles.frameRateEditPrev = str2double(handles.frameRateEdit.String);
 handles.widthEditPrev = str2double(handles.widthEdit.String);
 handles.heightEditPrev = str2double(handles.heightEdit.String);
+handles.xLowerLimitPrev = -100;
+handles.yLowerLimitPrev = -100;
+handles.zLowerLimitPrev = 0;
+handles.xUpperLimitPrev = 100;
+handles.yUpperLimitPrev = 100;
+handles.zUpperLimitPrev = 200;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -152,7 +158,7 @@ if mod(nVal, 1) == 0 && nVal > 0
     guidata(hObject, handles);
     handles.timeFactorStatic.String = ['Zeitfaktor: ' num2str(round(nVal/str2double(handles.dataResolutionEdit.String),2))];
 else
-    msgbox('Wert muss ein Integer größer als 0 sein.','Error','error');
+    msgbox(['Wert muss ein Integer gr' char(246) char(223) 'er als 0 sein.'],'Error','error');
     handles.frameRateEdit.String = num2str(handles.frameRateEditPrev);
 end
 
@@ -170,7 +176,7 @@ if mod(nVal, 1) == 0 && nVal > 0 && nVal <= 1000
     guidata(hObject, handles);
     handles.timeFactorStatic.String = ['Zeitfaktor: ' num2str(round(str2double(handles.frameRateEdit.String)/nVal,2))];
 else
-    msgbox('Wert muss ein Integer größer als 0 und kleiner gleich 1000 sein.','Error','error');
+    msgbox(['Wert muss ein Integer gr' char(246) char(223) 'er als 0 und kleiner gleich 1000 sein.'],'Error','error');
     handles.dataResolutionEdit.String = num2str(handles.dataResolutionEditPrev);
 end
 
@@ -203,7 +209,7 @@ if mod(nVal, 1) == 0 && nVal > 0 && nVal <= maxVal
     handles.widthEditPrev = nVal;
     guidata(hObject, handles);
 else
-    msgbox('Wert muss ein Integer größer als 0 und kleiner gleich der momentanen Bildschirmbreite in Pixel sein.','Error','error');
+    msgbox(['Wert muss ein Integer gr' char(246) char(223) 'er als 0 und kleiner gleich der momentanen Bildschirmbreite in Pixel sein.'],'Error','error');
     handles.widthEdit.String = num2str(handles.widthEditPrev);
 end
 
@@ -222,8 +228,140 @@ if mod(nVal, 1) == 0 && nVal > 0 && nVal <= maxVal
     handles.heightEditPrev = nVal;
     guidata(hObject, handles);
 else
-    msgbox('Wert muss ein Integer größer als 0 und kleiner gleich der momentanen Bildschirmöhe in Pixel sein.','Error','error');
+    msgbox(['Wert muss ein Integer gr' char(246) char(223) 'er als 0 und kleiner gleich der momentanen Bildschirm' char(246) 'he in Pixel sein.'],'Error','error');
     handles.heightEdit.String = num2str(handles.heightEditPrev);
+end
+
+
+% --- Executes on button press in axesLimitsCBox.
+function axesLimitsCBox_Callback(hObject, eventdata, handles)
+% hObject    handle to axesLimitsCBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of axesLimitsCBox
+if handles.axesLimitsCBox.Value == 0
+    state = 'on';
+else
+    state = 'off';
+end
+handles.xLowerLimit.Enable = state;
+handles.yLowerLimit.Enable = state;
+handles.zLowerLimit.Enable = state;
+handles.xUpperLimit.Enable = state;
+handles.yUpperLimit.Enable = state;
+handles.zUpperLimit.Enable = state;
+handles.xLabel.Enable = state;
+handles.yLabel.Enable = state;
+handles.zLabel.Enable = state;
+handles.upperLimitLabel.Enable = state;
+handles.lowerLimitLabel.Enable = state;
+
+
+function xLowerLimit_Callback(hObject, eventdata, handles)
+% hObject    handle to xLowerLimit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of xLowerLimit as text
+%        str2double(get(hObject,'String')) returns contents of xLowerLimit as a double
+nVal = str2double(handles.xLowerLimit.String);
+if ~isnan(nVal) && nVal < str2double(handles.xUpperLimit.String)
+    handles.xLowerLimitPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox('Wert muss eine dezimale Zahl kleiner als die obere Grenze sein.','Error','error');
+    handles.xLowerLimit.String = num2str(handles.xLowerLimitPrev);
+end
+
+
+
+function yLowerLimit_Callback(hObject, eventdata, handles)
+% hObject    handle to yLowerLimit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of yLowerLimit as text
+%        str2double(get(hObject,'String')) returns contents of yLowerLimit as a double
+nVal = str2double(handles.yLowerLimit.String);
+if ~isnan(nVal) && nVal < str2double(handles.yUpperLimit.String)
+    handles.yLowerLimitPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox('Wert muss eine dezimale Zahl kleiner als die obere Grenze sein.','Error','error');
+    handles.yLowerLimit.String = num2str(handles.yLowerLimitPrev);
+end
+
+
+
+function zLowerLimit_Callback(hObject, eventdata, handles)
+% hObject    handle to zLowerLimit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of zLowerLimit as text
+%        str2double(get(hObject,'String')) returns contents of zLowerLimit as a double
+nVal = str2double(handles.zLowerLimit.String);
+if ~isnan(nVal) && nVal < str2double(handles.zUpperLimit.String)
+    handles.zLowerLimitPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox('Wert muss eine dezimale Zahl kleiner als die obere Grenze sein.','Error','error');
+    handles.zLowerLimit.String = num2str(handles.zLowerLimitPrev);
+end
+
+
+
+function xUpperLimit_Callback(hObject, eventdata, handles)
+% hObject    handle to xUpperLimit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of xUpperLimit as text
+%        str2double(get(hObject,'String')) returns contents of xUpperLimit as a double
+nVal = str2double(handles.xUpperLimit.String);
+if ~isnan(nVal) && nVal > str2double(handles.xLowerLimit.String)
+    handles.xUpperLimitPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox(['Wert muss eine dezimale Zahl gr' char(246) char(223) 'er als die untere Grenze sein.'],'Error','error');
+    handles.xUpperLimit.String = num2str(handles.xUpperLimitPrev);
+end
+
+
+
+function yUpperLimit_Callback(hObject, eventdata, handles)
+% hObject    handle to yUpperLimit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of yUpperLimit as text
+%        str2double(get(hObject,'String')) returns contents of yUpperLimit as a double
+nVal = str2double(handles.yUpperLimit.String);
+if ~isnan(nVal) && nVal > str2double(handles.yLowerLimit.String)
+    handles.yUpperLimitPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox(['Wert muss eine dezimale Zahl gr' char(246) char(223) 'er als die untere Grenze sein.'],'Error','error');
+    handles.yUpperLimit.String = num2str(handles.yUpperLimitPrev);
+end
+
+
+
+function zUpperLimit_Callback(hObject, eventdata, handles)
+% hObject    handle to zUpperLimit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of zUpperLimit as text
+%        str2double(get(hObject,'String')) returns contents of zUpperLimit as a double
+nVal = str2double(handles.zUpperLimit.String);
+if ~isnan(nVal) && nVal > str2double(handles.zLowerLimit.String)
+    handles.zUpperLimitPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox(['Wert muss eine dezimale Zahl gr' char(246) char(223) 'er als die untere Grenze sein.'],'Error','error');
+    handles.zUpperLimit.String = num2str(handles.zUpperLimitPrev);
 end
 
 
@@ -262,26 +400,13 @@ config = config.config;
 maxI = size(config, 1);
 framenumber = round(maxI/1000*min([1000 dataResolution]));
 indeces = round(linspace(1, maxI, framenumber));
-f1 = figure('Position', [0 0 str2double(handles.widthEdit.String) str2double(handles.heightEdit.String)], 'PaperPositionMode','auto');
-colormap([0.3 0.3 0.3])
-lightangle(40,15)
-xlabel('x');ylabel('y');zlabel('z');
-daspect([1 1 1]);
-xlim([-60 60]);ylim([-60 60]);zlim([0 200]);
-view(40,25);
-hold on
 if  drawTrajectory
-    if ~drawBodyCurve
-        xlim([-100 100]);ylim([-100 100]);zlim([140 180]);
-        view(60,20)
-    end
     headData = zeros(3,framenumber);
 end
 if drawBodyCurve
     bodyData = cell(1,framenumber);
 end
 i2 = 1;
-tic
 for i = indeces
     x = config(i,:);
     if drawTrajectory && ~drawBodyCurve
@@ -293,7 +418,29 @@ for i = indeces
     end
     i2 = i2 + 1;
 end
-toc
+f1 = figure('Position', [0 0 str2double(handles.widthEdit.String) str2double(handles.heightEdit.String)], 'PaperPositionMode','auto');
+colormap([0.3 0.3 0.3])
+lightangle(40,15)
+xlabel('x');ylabel('y');zlabel('z');
+daspect([1 1 1]);
+view(40,25);
+if handles.axesLimitsCBox.Value == 0
+    xlim([str2double(handles.xLowerLimit.String) str2double(handles.xUpperLimit.String)]);
+    ylim([str2double(handles.yLowerLimit.String) str2double(handles.yUpperLimit.String)]);
+    zlim([str2double(handles.zLowerLimit.String) str2double(handles.zUpperLimit.String)]);
+else
+    if drawBodyCurve
+        t = cell2mat(bodyData);
+        xlim([min(t(1, 1:end))-5 max(t(1, 1:end))+5]);
+        ylim([min(t(2, 1:end))-5 max(t(2, 1:end))+5]);
+        zlim([min(t(3, 1:end))-5 max(t(3, 1:end))+5]);
+    else
+        xlim([min(headData(1, 1:end)) max(headData(1, 1:end))]);
+        ylim([min(headData(2, 1:end)) max(headData(2, 1:end))]);
+        zlim([min(headData(3, 1:end)) max(headData(3, 1:end))]);
+    end
+end
+hold on
 if doExport
     %     v = VideoWriter('out3', 'MPEG-4'); %only use when using win7+ or MacOSX 10.7+
     v = VideoWriter('out3', 'Motion JPEG AVI'); % works on linux
