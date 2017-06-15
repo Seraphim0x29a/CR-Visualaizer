@@ -22,7 +22,7 @@ function varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 15-Jun-2017 15:03:16
+% Last Modified by GUIDE v2.5 15-Jun-2017 15:10:53
 
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -132,7 +132,7 @@ if handles.exportCBox.Value == 0
 end
 
 if handles.exportCBox.Value == 0
-   state = 'off'; 
+    state = 'off';
 else
     state = 'on';
 end
@@ -418,12 +418,6 @@ function renderBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to renderBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-render(handles);
-
-
-%Function to render a single image or an animation showing differet aspects
-%of the actors simulated behaviour.
-function render(handles)
 startTime = tic;
 
 if isequal(handles.FilePath, -1)
@@ -489,8 +483,11 @@ else
 end
 hold on
 if doExport
-    %     v = VideoWriter('out3', 'MPEG-4'); %only use when using win7+ or MacOSX 10.7+
-    v = VideoWriter('out3', 'Motion JPEG AVI'); % works on linux
+    if ispc || ismac
+        v = VideoWriter('out3', 'MPEG-4');
+    else
+        v = VideoWriter('out3', 'Motion JPEG AVI');
+    end
     v.FrameRate = str2double(handles.frameRateEdit.String);
     v.Quality = 100;
     open(v);
@@ -608,10 +605,3 @@ if plotCurve
     v = v1*cos(t)+v3*sin(t)+pM;
     h = horzcat([0; 0; 0], v, p3);
 end
-
-
-% --- Executes during object creation, after setting all properties.
-function outputEdit_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to outputEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
