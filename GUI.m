@@ -22,7 +22,7 @@ function varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 15-Jun-2017 15:10:53
+% Last Modified by GUIDE v2.5 15-Jun-2017 15:55:32
 
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -66,6 +66,7 @@ handles.yUpperLimitPrev = 100;
 handles.zUpperLimitPrev = 200;
 handles.viewAzEditPrev = 40;
 handles.viewElEditPrev = 15;
+handles.savePath = pwd;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -413,6 +414,33 @@ else
 end
 
 
+% --- Executes on button press in saveDirectoryBtn.
+function saveDirectoryBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to saveDirectoryBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+filepath = uigetdir;
+if filepath ~= 0
+    %checking permisions does not work currently
+    [~,f] = fileattrib(filepath);   
+    if f.UserWrite == 1
+        handles.savePath = filepath;
+        handles.saveDirectoryStatic.String = filepath;
+        guidata(hObject, handles);
+    else
+        msgbox('Keine Schreibberechtigung.','Error','error');
+    end
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function saveDirectoryStatic_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to saveDirectoryStatic (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+hObject.String = pwd;
+
+
 % --- Executes on button press in renderBtn.
 function renderBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to renderBtn (see GCBO)
@@ -483,10 +511,11 @@ else
 end
 hold on
 if doExport
+    fileLocation = [handles.savePath filesep handles.fileNameEdit.String];
     if ispc || ismac
-        v = VideoWriter('out3', 'MPEG-4');
+        v = VideoWriter(fileLocaction, 'MPEG-4');
     else
-        v = VideoWriter('out3', 'Motion JPEG AVI');
+        v = VideoWriter(fileLocation, 'Motion JPEG AVI');
     end
     v.FrameRate = str2double(handles.frameRateEdit.String);
     v.Quality = 100;
