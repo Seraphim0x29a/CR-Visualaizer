@@ -511,6 +511,7 @@ else
 end
 hold on
 if doExport
+    ax = gca;
     fileLocation = [handles.savePath filesep handles.fileNameEdit.String];
     if ispc || ismac
         v = VideoWriter(fileLocaction, 'MPEG-4');
@@ -526,10 +527,10 @@ if doExport
         if clearFigure
             if drawTrajectory
                 if singleLineTrajectory
-                    plot3(headData(1,1:i),headData(2,1:i),headData(3,1:i),'-r');
+                    plot3(ax,headData(1,1:i),headData(2,1:i),headData(3,1:i),'-r');
                 else
                     i2 = max(1, i-1);
-                    plot3(headData(1,i2:i),headData(2,i2:i),headData(3,i2:i),'-r');
+                    plot3(ax,headData(1,i2:i),headData(2,i2:i),headData(3,i2:i),'-r');
                 end
             end
             if drawBodyCurve
@@ -548,7 +549,7 @@ if doExport
             cla(f1);
         else
             if drawTrajectory
-                j = plot3(headData(1,1:i),headData(2,1:i),headData(3,1:i),'-r');
+                j = plot3(ax,headData(1,1:i),headData(2,1:i),headData(3,1:i),'-r');
             end
             if drawBodyCurve
                 x = bodyData{:,i};
@@ -569,11 +570,10 @@ if doExport
         loopEndTime = toc(loopStartTime);
         meanLoopTime = (meanLoopTime * (i-1) + loopEndTime)/(i);
         rTime = round(meanLoopTime*(framenumber-i),2);
-        fprintf('%d of %d Frames (%.2f%%); estimated time remaining: %.0fh %.0fm %.0fs\n',...
+        handles.outputEdit.String = sprintf('%d of %d Frames (%.2f%%); estimated time remaining: %.0fh %.0fm %.0fs\n',...
             i, framenumber, round(i/framenumber*100,2), floor(rTime/3600),floor(mod(rTime/60,60)), floor(mod(rTime,60)));
     end
 else
-    tic
     if drawTrajectory
         plot3(headData(1,:),headData(2,:),headData(3,:),'-r');
     end
@@ -590,11 +590,10 @@ else
         end
         shading interp
     end
-    toc
 end
 % savefig(f1, 'fig_script_compact.fig', 'compact');
 rTime = toc(startTime);
-fprintf('Time elapsed: %.0fh %.0fm %.0fs %.0fms\n', ...
+handles.outputEdit.String = sprintf('Time elapsed: %.0fh %.0fm %.0fs %.0fms\n', ...
     floor(rTime/3600),floor(mod(rTime/60,60)), floor(mod(rTime,60)), (rTime-floor(rTime))*1000);
 
 
