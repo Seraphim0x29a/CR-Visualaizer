@@ -22,7 +22,7 @@ function varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 15-Jun-2017 12:20:20
+% Last Modified by GUIDE v2.5 15-Jun-2017 15:03:16
 
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -64,6 +64,8 @@ handles.zLowerLimitPrev = 0;
 handles.xUpperLimitPrev = 100;
 handles.yUpperLimitPrev = 100;
 handles.zUpperLimitPrev = 200;
+handles.viewAzEditPrev = 40;
+handles.viewElEditPrev = 15;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -128,6 +130,18 @@ if handles.exportCBox.Value == 0
     handles.clearCBox.Value = 0;
     handles.singleLineCBox.Value = 0;
 end
+
+if handles.exportCBox.Value == 0
+   state = 'off'; 
+else
+    state = 'on';
+end
+handles.singleLineCBox.Enable = state;
+handles.clearCBox.Enable = state;
+handles.frameRateEdit.Enable = state;
+handles.frameRateStatic.Enable = state;
+handles.timeFactorStatic.Enable = state;
+handles.timeFactorInfoStatic.Enable = state;
 
 
 % --- Executes on button press in clearCBox.
@@ -365,6 +379,40 @@ else
 end
 
 
+function viewAzEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to viewAzEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of viewAzEdit as text
+%        str2double(get(hObject,'String')) returns contents of viewAzEdit as a double
+nVal = str2double(handles.viewAzEdit.String);
+if ~isnan(nVal)
+    handles.viewAzEditPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox('Wert muss eine dezimale Zahl sein.','Error','error');
+    handles.viewAzEdit.String = num2str(handles.viewAzEditPrev);
+end
+
+
+function viewElEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to viewElEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of viewElEdit as text
+%        str2double(get(hObject,'String')) returns contents of viewElEdit as a double
+nVal = str2double(handles.viewElEdit.String);
+if ~isnan(nVal)
+    handles.viewElEditPrev = nVal;
+    guidata(hObject, handles);
+else
+    msgbox('Wert muss eine dezimale Zahl sein.','Error','error');
+    handles.viewElEdit.String = num2str(handles.viewElEditPrev);
+end
+
+
 % --- Executes on button press in renderBtn.
 function renderBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to renderBtn (see GCBO)
@@ -392,7 +440,6 @@ end
 doExport =  handles.exportCBox.Value;
 clearFigure = handles.clearCBox.Value;
 dataResolution = str2double(handles.dataResolutionEdit.String);
-framerate = str2double(handles.frameRateEdit.String);
 
 config = load(strcat(handles.FilePath, handles.FileName));
 config = config.config;
@@ -423,7 +470,7 @@ colormap([0.3 0.3 0.3])
 lightangle(40,15)
 xlabel('x');ylabel('y');zlabel('z');
 daspect([1 1 1]);
-view(40,25);
+view(str2double(handles.viewAzEdit.String),str2double(handles.viewElEdit.String));
 if handles.axesLimitsCBox.Value == 0
     xlim([str2double(handles.xLowerLimit.String) str2double(handles.xUpperLimit.String)]);
     ylim([str2double(handles.yLowerLimit.String) str2double(handles.yUpperLimit.String)]);
@@ -444,7 +491,7 @@ hold on
 if doExport
     %     v = VideoWriter('out3', 'MPEG-4'); %only use when using win7+ or MacOSX 10.7+
     v = VideoWriter('out3', 'Motion JPEG AVI'); % works on linux
-    v.FrameRate = framerate;
+    v.FrameRate = str2double(handles.frameRateEdit.String);
     v.Quality = 100;
     open(v);
     meanLoopTime = 0;
@@ -561,3 +608,10 @@ if plotCurve
     v = v1*cos(t)+v3*sin(t)+pM;
     h = horzcat([0; 0; 0], v, p3);
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function outputEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to outputEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
