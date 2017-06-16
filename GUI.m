@@ -22,7 +22,7 @@ function varargout = GUI(varargin)
 
 % Edit the above text to modify the response to help GUI
 
-% Last Modified by GUIDE v2.5 15-Jun-2017 15:55:32
+% Last Modified by GUIDE v2.5 16-Jun-2017 22:08:31
 
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
@@ -143,6 +143,10 @@ handles.frameRateEdit.Enable = state;
 handles.frameRateStatic.Enable = state;
 handles.timeFactorStatic.Enable = state;
 handles.timeFactorInfoStatic.Enable = state;
+handles.fileNameStatic.Enable = state;
+handles.fileNameEdit.Enable = state;
+handles.saveDirectoryBtn.Enable = state;
+handles.saveDirectoryStatic.Enable = state;
 
 
 % --- Executes on button press in clearCBox.
