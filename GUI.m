@@ -130,9 +130,6 @@ function exportCBox_Callback(hObject, eventdata, handles)
 if handles.exportCBox.Value == 0
     handles.clearCBox.Value = 0;
     handles.singleLineCBox.Value = 0;
-end
-
-if handles.exportCBox.Value == 0
     state = 'off';
 else
     state = 'on';
@@ -158,9 +155,6 @@ function clearCBox_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of clearCBox
 if handles.clearCBox.Value == 0
     handles.singleLineCBox.Value = 0;
-end
-if handles.clearCBox.Value == 1
-    handles.exportCBox.Value = 1;
 end
 
 
@@ -492,7 +486,6 @@ for i = indeces
     i2 = i2 + 1;
 end
 f1 = figure('Position', [0 0 str2double(handles.widthEdit.String) str2double(handles.heightEdit.String)], 'PaperPositionMode','auto');
-colormap([0.3 0.3 0.3])
 lightangle(40,15)
 xlabel('x');ylabel('y');zlabel('z');
 daspect([1 1 1]);
@@ -514,11 +507,12 @@ else
     end
 end
 hold on
+ax = gca;
+colormap(ax, [0.3 0.3 0.3])
 if doExport
-    ax = gca;
     fileLocation = [handles.savePath filesep handles.fileNameEdit.String];
     if ispc || ismac
-        v = VideoWriter(fileLocaction, 'MPEG-4');
+        v = VideoWriter(fileLocation, 'MPEG-4');
     else
         v = VideoWriter(fileLocation, 'Motion JPEG AVI');
     end
@@ -539,32 +533,37 @@ if doExport
             end
             if drawBodyCurve
                 x = bodyData{:,i};
-                h = streamtube({[x(1,:);x(2,:);x(3,:)]'}, 3);
+                h = streamtube(ax,{[x(1,:);x(2,:);x(3,:)]'}, 3);
                 h.FaceLighting = 'gouraud';
+                h.EdgeColor = 'none';
                 h.AmbientStrength = 0.8;
                 h.DiffuseStrength = 0.7;
                 h.SpecularStrength = 0.8;
                 h.SpecularExponent = 15;
                 h.BackFaceLighting = 'unlit';
-                lightangle(40,15)
-                shading interp
+                colormap(ax,[0.3 0.3 0.3])
+                lHandle = light(ax);
+                lightangle(lHandle, 40,15);
+                shading(ax, 'interp')
             end
             writeVideo(v, getframe(f1));
-            cla(f1);
+            cla(ax);
         else
             if drawTrajectory
                 j = plot3(ax,headData(1,1:i),headData(2,1:i),headData(3,1:i),'-r');
             end
             if drawBodyCurve
                 x = bodyData{:,i};
-                h = streamtube({[x(1,:);x(2,:);x(3,:)]'}, 3);
+                h = streamtube(ax,{[x(1,:);x(2,:);x(3,:)]'}, 3);
                 h.FaceLighting = 'gouraud';
+                h.EdgeColor = 'none';
                 h.AmbientStrength = 0.8;
                 h.DiffuseStrength = 0.7;
                 h.SpecularStrength = 0.8;
                 h.SpecularExponent = 15;
                 h.BackFaceLighting = 'unlit';
-                shading interp
+                colormap(ax,[0.3 0.3 0.3])
+                shading(ax, 'interp')
             end
             writeVideo(v, getframe(f1));
             if drawTrajectory
@@ -574,18 +573,19 @@ if doExport
         loopEndTime = toc(loopStartTime);
         meanLoopTime = (meanLoopTime * (i-1) + loopEndTime)/(i);
         rTime = round(meanLoopTime*(framenumber-i),2);
-        handles.outputEdit.String = sprintf('%d of %d Frames (%.2f%%); estimated time remaining: %.0fh %.0fm %.0fs\n',...
+        handles.outputEdit.String = sprintf('%d of %d Frames (%.2f%%)\nEstimated time remaining: %.0fh %.0fm %.0fs',...
             i, framenumber, round(i/framenumber*100,2), floor(rTime/3600),floor(mod(rTime/60,60)), floor(mod(rTime,60)));
     end
 else
     if drawTrajectory
-        plot3(headData(1,:),headData(2,:),headData(3,:),'-r');
+        plot3(ax, headData(1,:),headData(2,:),headData(3,:),'-r');
     end
     if drawBodyCurve
         for i = 1:framenumber
             x = bodyData{:,i};
-            h = streamtube({[x(1,:);x(2,:);x(3,:)]'}, 3);
+            h = streamtube(ax, {[x(1,:);x(2,:);x(3,:)]'}, 3);
             h.FaceLighting = 'gouraud';
+            h.EdgeColor = 'none';
             h.AmbientStrength = 0.8;
             h.DiffuseStrength = 0.7;
             h.SpecularStrength = 0.8;
@@ -597,7 +597,7 @@ else
 end
 % savefig(f1, 'fig_script_compact.fig', 'compact');
 rTime = toc(startTime);
-handles.outputEdit.String = sprintf('Time elapsed: %.0fh %.0fm %.0fs %.0fms\n', ...
+handles.outputEdit.String = sprintf('Time elapsed: %.0fh %.0fm %.0fs %.0fms', ...
     floor(rTime/3600),floor(mod(rTime/60,60)), floor(mod(rTime,60)), (rTime-floor(rTime))*1000);
 
 

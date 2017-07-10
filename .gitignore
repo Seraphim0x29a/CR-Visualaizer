@@ -1,0 +1,9 @@
+misc
+
+output
+*.asv
+*.*~
+*.jpg
+*.avi
+*.mp4
+*.prj
